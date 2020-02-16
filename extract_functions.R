@@ -45,11 +45,8 @@ extract_functions <- function(x, evaluate = TRUE, verbose = TRUE,
                                                   where = "corrupt")
         brace_count <- 0
         in_function <- FALSE
-        cat("corrupt line: ")
       }
-      
     }
-    cat(current_line, "brace_count", brace_count, "\n")
   }
   
   extracted_functions <- lapply(extracted_functions, paste, collapse = "\n")
