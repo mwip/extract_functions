@@ -1,6 +1,7 @@
 library(stringr)
 
-extract_functions <- function(x, eval = TRUE, verbose = TRUE) {
+extract_functions <- function(x, evaluate = TRUE, verbose = TRUE, 
+                              envir = parent.frame()) {
   lines <- readLines(x)
   
   extracted_functions <- list()
@@ -60,11 +61,14 @@ extract_functions <- function(x, eval = TRUE, verbose = TRUE) {
       })
   }
   
-  if (eval) {
+  if (evaluate) {
     valid_functions <- sapply(extracted_functions, function(x) {
       x != "corrupt function"
     })
-    do.call(evaluate_extracted_function, extracted_functions[valid_functions])
+    
+    do.call(eval, lapply(extracted_functions[valid_functions], 
+                         function(x){parse(text = x)}), 
+            envir = envir)
   }
 }
 
@@ -94,10 +98,7 @@ append_to_extracts <- function(extracts_list, x, where) {
   return(extracts_list)
 }
 
-evaluate_extracted_function <- function(x, envir = parent.frame()){
-  eval(parse(text = x), envir = envir)
-}
 
 
 #### TEST #### 
-extract_functions("test.R", eval = TRUE, verbose = TRUE)
+extract_functions("test.R", evaluate = TRUE, verbose = TRUE)
