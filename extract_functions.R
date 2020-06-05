@@ -98,4 +98,4 @@ append_to_extracts <- function(extracts_list, x, where) {
 
 
 #### TEST #### 
-extract_functions("test.R", evaluate = TRUE, verbose = TRUE)
+# extract_functions("test.R", evaluate = TRUE, verbose = TRUE)
