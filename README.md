@@ -9,4 +9,4 @@ Feel free to raise any issues or pull requests.
 ## TODOs
 
  - [ ] Include inicator where to find corrupt functions (in append_to_extracts())
- - [ ] Add functionality for mulit-line function headers
+ - [x] Add functionality for multi-line function headers

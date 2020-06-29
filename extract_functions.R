@@ -7,21 +7,44 @@ extract_functions <- function(x, evaluate = TRUE, verbose = TRUE,
   extracted_functions <- list()
   brace_count <- 0
   in_function <- FALSE
+  in_definition <- FALSE
   
   for(current_line in lines) {
     # first check if already in a function
-    if (!in_function){
+    if (!in_function | in_definition){
       # if not, check if current_line is the beginning of a function
       if (str_detect(current_line, "<-[[:blank:]]*function[[:blank:]]*\\(")) {
-        # reset brace_count
-        brace_count <- 0
-        # if so indicate
-        in_function <- TRUE
-        # increase the brace_count
-        brace_count <- brace_count + count_braces(current_line)
         # and add the current_line to the next list item of extracted_functions
         extracted_functions <- append_to_extracts(extracted_functions, 
                                                   current_line, where = "new")
+        if (str_detect(current_line, "\\{")) {
+          # no longer in definition
+          in_definition <- FALSE
+          # reset brace_count
+          brace_count <- 0
+          # if so indicate
+          in_function <- TRUE
+          # increase the brace_count
+          brace_count <- brace_count + count_braces(current_line)
+        } else {
+          in_definition <- TRUE
+        }
+      } else {
+        if (in_definition) {
+        # and add the current_line to the last list item of extracted_functions
+        extracted_functions <- append_to_extracts(extracted_functions, 
+                                                  current_line, where = "last")
+          if (str_detect(current_line, "\\{")) {
+            # no longer in definition
+            in_definition <- FALSE
+            # reset brace_count
+            brace_count <- 0
+            # if so indicate
+            in_function <- TRUE
+            # increase the brace_count
+            brace_count <- brace_count + count_braces(current_line)
+          }
+        }
       }
     } else {
       # if already in a function, first update brace count with the current_line
@@ -62,10 +85,15 @@ extract_functions <- function(x, evaluate = TRUE, verbose = TRUE,
     valid_functions <- sapply(extracted_functions, function(x) {
       x != "corrupt function"
     })
+     
+    extracted_functions_to_eval <- lapply(extracted_functions[valid_functions], 
+                                          function(x){parse(text = x)})
     
-    do.call(eval, lapply(extracted_functions[valid_functions], 
-                         function(x){parse(text = x)}), 
-            envir = envir)
+    invisible(
+      lapply(extracted_functions_to_eval, function(x, envir) {
+        eval(x, envir = envir)
+      }, envir = envir)
+    )
   }
 }
 
